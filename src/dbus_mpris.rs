@@ -93,6 +93,13 @@ impl Future for DbusServer {
             } else {
                 self.token_request = Some(get_token(&self.session, CLIENT_ID, SCOPE));
             }
+
+			// force our first poll of the dbus, otherwise it will get blocked waiting on
+			// the first poll from librespot to happen
+            if let Some(ref mut fut) = self.dbus_future {
+	            return fut.poll();
+			}
+			
         } else if let Some(ref mut fut) = self.dbus_future {
             return fut.poll();
         }

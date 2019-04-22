@@ -35,6 +35,6 @@ git = "https://github.com/librespot-org/librespot.git"
 alsa_backend = ["librespot/alsa-backend", "alsa"]
 dbus_keyring = ["keyring"]
 dbus_mpris = ["dbus", "dbus-tokio"]
-default = ["alsa_backend"]
+default = ["alsa_backend","dbus_mpris"]
 portaudio_backend = ["librespot/portaudio-backend"]
 pulseaudio_backend = ["librespot/pulseaudio-backend"]

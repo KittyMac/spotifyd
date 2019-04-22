@@ -11,6 +11,7 @@ use librespot::{
         cache::Cache,
         config::{ConnectConfig, DeviceType, SessionConfig},
         session::Session,
+		spotify_id::SpotifyId
     },
     playback::{
         audio_backend::Sink,
@@ -101,6 +102,7 @@ impl Future for MainLoopState {
     type Item = ();
 
     fn poll(&mut self) -> Poll<(), ()> {
+		
         loop {
             if let Async::Ready(Some(creds)) =
                 self.librespot_connection.discovery_stream.poll().unwrap()
@@ -172,6 +174,14 @@ impl Future for MainLoopState {
                     shared_spirc,
                     self.spotifyd_state.device_name.clone(),
                 );
+				
+				// spawn a player event when the server starts up
+                if let Some(ref program) = self.spotifyd_state.player_event_program {
+					let track = SpotifyId::from_base62("nothingtoseehere").unwrap();
+                    let child = run_program_on_events(PlayerEvent::Stopped { track_id:track }, program);
+                    self.running_event_program = Some(child);
+                }
+				
             } else if let Async::Ready(_) = self.spotifyd_state.ctrl_c_stream.poll().unwrap() {
                 if !self.spotifyd_state.shutting_down {
                     if let Some(ref spirc) = self.librespot_connection.spirc {

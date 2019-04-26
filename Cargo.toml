@@ -29,7 +29,7 @@ xdg = "2.2"
 [dependencies.librespot]
 default-features = false
 features = ["with-tremor"]
-git = "https://github.com/librespot-org/librespot.git"
+git = "https://github.com/KittyMac/librespot.git"
 
 [features]
 alsa_backend = ["librespot/alsa-backend", "alsa"]

@@ -105,7 +105,6 @@ impl Future for DbusServer {
         }
 		
 		if let Some(ref mut fut) = self.dbus_future {
-			warn!("Calling poll on dbus location 2");
             return fut.poll();
         }
 

@@ -136,9 +136,6 @@ impl Future for MainLoopState {
             }
 
             if let Some(ref mut fut) = self.spotifyd_state.dbus_mpris_server {
-				warn!("Calling poll on dbus location 3");
-				
-				// note: we should catch exception here somehow...
                 let _ = fut.poll()?;
             }
 

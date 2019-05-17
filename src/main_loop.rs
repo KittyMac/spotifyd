@@ -23,6 +23,7 @@ use librespot::{
 use std::{io, process::Child, rc::Rc};
 use tokio_core::reactor::Handle;
 use tokio_io::IoStream;
+use log::{warn};
 
 pub struct LibreSpotConnection {
     connection: Box<Future<Item = Session, Error = io::Error>>,
@@ -135,7 +136,10 @@ impl Future for MainLoopState {
             }
 
             if let Some(ref mut fut) = self.spotifyd_state.dbus_mpris_server {
-                let _ = fut.poll();
+				warn!("Calling poll on dbus location 3");
+				
+				// note: we should catch exception here somehow...
+                let _ = fut.poll()?;
             }
 
             if let Async::Ready(session) = self.librespot_connection.connection.poll().unwrap() {
@@ -156,7 +160,7 @@ impl Future for MainLoopState {
                 let (spirc, spirc_task) = Spirc::new(
                     ConnectConfig {
                         name: self.spotifyd_state.device_name.clone(),
-                        device_type: DeviceType::Speaker,
+                        device_type: DeviceType::default(),
                         volume: mixer.volume(),
                         linear_volume: self.linear_volume,
                     },

@@ -62,8 +62,10 @@ impl DbusServer {
 
     fn is_token_expired(&self) -> bool {
         let now: DateTime<Utc> = Utc::now();
+		
+		// get a new token every 30 minutes (it expires every 60 minutes)
         match self.api_token.expires_at {
-            Some(expires_at) => now.timestamp() > expires_at - 100,
+            Some(expires_at) => now.timestamp() > expires_at - (60 * 30),
             None => true,
         }
     }
@@ -76,6 +78,9 @@ impl Future for DbusServer {
     fn poll(&mut self) -> Poll<(), ()> {
         let mut got_new_token = false;
         if self.is_token_expired() {
+			
+			warn!("calling is_token_expired() returned true");
+			
             if let Some(ref mut fut) = self.token_request {
                 if let Async::Ready(token) = fut.poll().unwrap() {
                     self.api_token = RspotifyToken::default()
@@ -93,19 +98,15 @@ impl Future for DbusServer {
             } else {
                 self.token_request = Some(get_token(&self.session, CLIENT_ID, SCOPE));
             }
-
-			// force our first poll of the dbus, otherwise it will get blocked waiting on
-			// the first poll from librespot to happen
-            if let Some(ref mut fut) = self.dbus_future {
-	            return fut.poll();
-			}
-			
-        } else if let Some(ref mut fut) = self.dbus_future {
-            return fut.poll();
         }
 
         if got_new_token {
             self.token_request = None;
+        }
+		
+		if let Some(ref mut fut) = self.dbus_future {
+			warn!("Calling poll on dbus location 2");
+            return fut.poll();
         }
 
         Ok(Async::NotReady)
